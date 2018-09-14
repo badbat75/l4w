@@ -65,15 +65,16 @@ do
 				curl -sO $patch >> ${LDIR}/$package.log 2>&1
 			done
 			cd ..
-			for patch in $(ls patches/*.patch)
+			for patch in $(ls patches/*)
 			do
+				echo -n "$patch... "
 				patch < $patch >> ${LDIR}/$package.log 2>&1
 			done
 		fi
 		if [[ "${BUILDFLAGs[$package]}" =~ "autoreconf" ]]
 		then
 			echo -n "reconfiguring... "
-			cd ${SRCDIRs[$package]}
+			cd ${SD}/${SRCDIRs[$package]}
 			autoreconf -fi >> ${LDIR}/$package.log 2>&1
 		fi
 	fi
@@ -86,7 +87,7 @@ do
 		echo -n "building... "
 		CFLAGS=${CFLAGSs[$package]} ${SD}/${SRCDIRs[$package]}${CONFs[$package]} >> ${LDIR}/$package.log 2>&1 &&
 		make -j$THREADS V=1 >> ${LDIR}/$package.log 2>&1 &&
-		make install >> ${LDIR}/$package.log 2>&1 &&
+		make DESTDIR=${TD} install >> ${LDIR}/$package.log 2>&1 &&
 		touch l4w.installed &&
 		echo "installed." || echo "failed."
 	else
