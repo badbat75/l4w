@@ -1,5 +1,5 @@
 ### Package settings
-PKGLIST="zlib gmp gmp-shared mpfr isl mpc iconv xml2"
+PKGLIST="zlib gmp gmp-shared mpfr isl mpc iconv xml2 ncurses winpthreads"
 
 # zlib
 PKGNAMEs[zlib]="zlib-1.2.11.tar.xz"
@@ -53,3 +53,16 @@ CFLAGSs[xml2]="${CFLAGS}"
 CONFs[xml2]="configure --build=x86_64-linux-gnu --host=$HOST --prefix=$TD --enable-shared --without-python --with-iconv=$TD --with-zlib=$TD"
 ### --with-pthread
 BUILDFLAGs[xml2]="autoreconf"
+
+# ncurses
+PKGNAMEs[ncurses]="ncurses-6.1.tar.gz"
+URLs[ncurses]="https://invisible-mirror.net/archives/ncurses/${PKGNAMEs[ncurses]}"
+CFLAGSs[ncurses]="${CFLAGS}"
+CONFs[ncurses]="configure --build=x86_64-linux-gnu --host=$HOST --prefix=$TD --with-shared --enable-term-driver --enable-sp-funcs --without-debug --enable-termcap --enable-symlinks --without-manpages --without-tests --without-cxx --without-cxx-binding --without-ada --disable-database --disable-db-install --with-fallbacks=linux,xterm,xterm-color,xterm-256color,vt100"
+### --with-pthread
+
+# winpthreads
+PKGNAMEs[winpthreads]="mingw-w64-v5.0.4.tar.bz2"
+URLs[winpthreads]="https://sourceforge.net/projects/mingw-w64/files/mingw-w64/mingw-w64-release/${PKGNAMEs[winpthreads]}/download/"
+CFLAGSs[winpthreads]="${CFLAGS}"
+CONFs[winpthreads]="mingw-w64-libraries/winpthreads/configure --build=x86_64-linux-gnu --host=$HOST --prefix=$TD --with-shared"
