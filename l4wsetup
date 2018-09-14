@@ -1,0 +1,96 @@
+#!/bin/bash
+
+#set -x
+
+### Performance
+THREADS=$(echo $(nproc)/2+1 | bc) 
+
+### Directory settings
+WD=$(dirname $(realpath $0))
+PD=${WD}/packages
+SD=${WD}/src
+BD=${WD}/build
+LDIR=${WD}/log
+SYSROOT=c:/l4w
+TD=/mnt/c/l4w
+
+### CrossCompiler environment
+HOST=x86_64-w64-mingw32
+XCP=/opt/x-tools/$HOST
+XCBP=$XCP/bin
+export PATH=${XCBP}:${PATH}
+export CC=$HOST-gcc
+export CXX=$HOST-g++
+export CPP=$HOST-cpp
+export RANLIB=$CC-ranlib
+export LD=$HOST-ld
+#export LDFLAGS="-L$XCP/$HOST/sysroot/mingw/lib -L$XCP/$HOST/sysroot/lib -L$XCP/$HOST/sysroot/usr/lib"
+export uname="mingw"
+
+declare -A PKGNAMEs
+declare -A URLs
+declare -A PATCHes
+declare -A CFLAGSs
+declare -A CONFs
+declare -A SRCDIRs
+declare -A BUILDFLAGs
+
+[ -f $WD/l4wsetup.res ] && . $WD/l4wsetup.res || exit 1
+
+### Main
+
+[ ! -d ${PD} ] && mkdir ${PD}
+[ ! -d ${SD} ] && mkdir ${SD}
+[ ! -d ${BD} ] && mkdir ${BD}
+[ ! -d ${TD} ] && mkdir ${TD}
+[ ! -d ${LDIR} ] && mkdir ${LDIR}
+
+for package in ${PKGLIST}
+do
+	echo -n "$package: downloading... "
+	cd ${PD}
+	[ ! -f ${PKGNAMEs[$package]} ] && curl -sLo ${PKGNAMEs[$package]} ${URLs[$package]}
+	cd ${SD}
+	SRCDIRs[$package]=$(tar tf ${PD}/${PKGNAMEs[$package]} | head -n1)
+	if [ ! -d ${SRCDIRs[$package]} ]
+	then
+		tar xf ${PD}/${PKGNAMEs[$package]}
+		if [ ! -z "${PATCHes[$package]}" ]
+		then
+			echo -n "patching... "
+			mkdir ${SRCDIRs[$package]}/patches
+			cd ${SRCDIRs[$package]}/patches
+			for patch in ${PATCHes[$package]}
+			do
+				curl -sO $patch >> ${LDIR}/$package.log 2>&1
+			done
+			cd ..
+			for patch in $(ls patches/*.patch)
+			do
+				patch < $patch >> ${LDIR}/$package.log 2>&1
+			done
+		fi
+		if [[ "${BUILDFLAGs[$package]}" =~ "autoreconf" ]]
+		then
+			echo -n "reconfiguring... "
+			autoreconf -fi
+		fi
+	fi
+	cd ${BD}
+	[ ! -d $package ] && mkdir $package
+	cd $package
+	if [ ! -f l4w.installed ]
+	then
+		rm -rf *
+		echo -n "building... "
+		CFLAGS=${CFLAGSs[$package]} ${SD}/${SRCDIRs[$package]}${CONFs[$package]} >> ${LDIR}/$package.log 2>&1 &&
+		make -j$THREADS V=1 >> ${LDIR}/$package.log 2>&1 &&
+		make install >> ${LDIR}/$package.log 2>&1 &&
+		touch l4w.installed &&
+		echo "installed." || echo "failed."
+	else
+		echo "already installed."
+	fi
+#	read
+	cd ${WD}
+done
