@@ -18,7 +18,7 @@ TD=/mnt/c/l4w
 HOST=x86_64-w64-mingw32
 XCP=/opt/x-tools/$HOST
 XCBP=$XCP/bin
-export PATH=${XCBP}:${PATH}
+export PATH=${PATH}:${XCBP}
 export CC=$HOST-gcc
 export CXX=$HOST-g++
 export CPP=$HOST-cpp
@@ -73,7 +73,8 @@ do
 		if [[ "${BUILDFLAGs[$package]}" =~ "autoreconf" ]]
 		then
 			echo -n "reconfiguring... "
-			autoreconf -fi
+			cd ${SRCDIRs[$package]}
+			autoreconf -fi >> ${LDIR}/$package.log 2>&1
 		fi
 	fi
 	cd ${BD}
