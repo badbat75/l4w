@@ -1,5 +1,5 @@
 ### Package settings
-PKGLIST="zlib winpthreads ncurses readline gmp gmp-shared mpfr isl mpc iconv xml2"
+PKGLIST="zlib winpthreads ncurses readline gmp gmp-shared mpfr isl mpc iconv xml2 gettext"
 
 # zlib
 PKGNAMEs[zlib]="zlib-1.2.11.tar.xz"
@@ -72,3 +72,10 @@ URLs[xml2]="https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.9.8/${PKGNAMEs[x
 CFLAGSs[xml2]="${CFLAGS}"
 CONFs[xml2]="configure --build=x86_64-linux-gnu --host=$HOST --prefix= --with-sysroot=${TD} --enable-shared --without-python --with-iconv=${TD} --with-zlib=${TD}"
 BUILDFLAGs[xml2]="autoreconf"
+
+# gettext
+PKGNAMEs[gettext]="gettext-0.19.8.1.tar.xz"
+URLs[gettext]="https://ftp.gnu.org/pub/gnu/gettext/${PKGNAMEs[gettext]}"
+PATCHes[gettext]="https://raw.githubusercontent.com/Alexpux/MINGW-packages/master/mingw-w64-gettext/00-relocatex-libintl-0.18.3.1.patch https://raw.githubusercontent.com/Alexpux/MINGW-packages/master/mingw-w64-gettext/04-mingw-script-slash-fix.mingw.patch https://raw.githubusercontent.com/Alexpux/MINGW-packages/master/mingw-w64-gettext/05-always-use-libintl-vsnprintf.mingw.patch https://raw.githubusercontent.com/Alexpux/MINGW-packages/master/mingw-w64-gettext/06-dont-include-ctype-after-gnulibs-wctype.mingw.patch https://raw.githubusercontent.com/Alexpux/MINGW-packages/master/mingw-w64-gettext/07-fix-asprintf-conflict.mingw.patch https://raw.githubusercontent.com/Alexpux/MINGW-packages/master/mingw-w64-gettext/08-vs-compatible.patch https://raw.githubusercontent.com/Alexpux/MINGW-packages/master/mingw-w64-gettext/09-asm-underscore-mingw.patch https://raw.githubusercontent.com/Alexpux/MINGW-packages/master/mingw-w64-gettext/120-Fix-Woe32-link-errors-when-compiling-with-O0.patch https://raw.githubusercontent.com/Alexpux/MINGW-packages/master/mingw-w64-gettext/121-keep-posix-path.patch https://raw.githubusercontent.com/Alexpux/MINGW-packages/master/mingw-w64-gettext/122-Use-LF-as-newline-in-envsubst.patch"
+CFLAGSs[gettext]="${CFLAGS} -I${TD}/include -Wl,-L${TD}/lib"
+CONFs[gettext]="configure --build=x86_64-linux-gnu --host=$HOST --prefix= --with-sysroot=${TD} --with-libiconv-prefix=${TD} --with-libncurses-prefix=${TD} --with-libxml2-prefix=/mnt/c/l4w --with-libpth-prefix=/mnt/c/l4w --enable-relocatable --disable-java  --disable-native-java --disable-csharp --enable-threads=win32 --without-emacs --disable-openmp --without-cvs --without-git --disable-silent-rules"

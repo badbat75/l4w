@@ -59,17 +59,24 @@ do
 		then
 			echo -n "patching... "
 			mkdir ${SRCDIRs[$package]}/patches
-			cd ${SRCDIRs[$package]}/patches
+#			cd ${SRCDIRs[$package]}/patches
 			for patch in ${PATCHes[$package]}
 			do
-				curl -sO $patch >> ${LDIR}/$package.log 2>&1
+				patch_url="$(echo $patch | sed 's/\[.*\]//g')"
+				patch_name="$(echo $patch_url | sed 's/.*\///')"
+				patch_param="$(echo $patch | sed -E 's/.*\[(.*)(\].*)/\1/g')"
+				echo -n "$patch_name... "
+				cd patches
+				curl -sO $patch_url >> ${LDIR}/$package.log 2>&1
+				cd ..
+				patch $patch_param < patches/$patch_name
 			done
-			cd ..
-			for patch in $(ls patches/*)
-			do
-				echo -n "$patch... "
-				patch < $patch >> ${LDIR}/$package.log 2>&1
-			done
+#			cd ..
+#			for patch in $(ls patches/*)
+#			do
+#				echo -n "$patch... "
+#				patch < $patch >> ${LDIR}/$package.log 2>&1
+#			done
 		fi
 		if [[ "${BUILDFLAGs[$package]}" =~ "autoreconf" ]]
 		then
