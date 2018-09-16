@@ -59,7 +59,7 @@ do
 		then
 			echo -n "patching... "
 			mkdir ${SRCDIRs[$package]}/patches
-#			cd ${SRCDIRs[$package]}/patches
+			cd ${SRCDIRs[$package]}
 			for patch in ${PATCHes[$package]}
 			do
 				patch_url="$(echo $patch | sed 's/\[.*\]//g')"
