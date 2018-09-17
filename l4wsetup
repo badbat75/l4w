@@ -51,7 +51,7 @@ do
 	cd ${PD}
 	[ ! -f ${PKGNAMEs[$package]} ] && curl -sLo ${PKGNAMEs[$package]} ${URLs[$package]}
 	cd ${SD}
-	SRCDIRs[$package]=$(tar tf ${PD}/${PKGNAMEs[$package]} | head -n1)
+	SRCDIRs[$package]=$(tar tf ${PD}/${PKGNAMEs[$package]} | head -n1 | awk -F "/" '{ print $1 }')
 	if [ ! -d ${SRCDIRs[$package]} ]
 	then
 		tar xf ${PD}/${PKGNAMEs[$package]}
@@ -62,28 +62,31 @@ do
 			cd ${SRCDIRs[$package]}
 			for patch in ${PATCHes[$package]}
 			do
-				patch_url="$(echo $patch | sed 's/\[.*\]//g')"
+				patch_url="$(echo $patch | sed -E 's/(.*)\[(.*)\]/\1/g')"
 				patch_name="$(echo $patch_url | sed 's/.*\///')"
-				patch_param="$(echo $patch | sed -E 's/.*\[(.*)(\].*)/\1/g')"
+				patch_param="$(echo $patch | sed -E 's/(.*)\[(.*)\]/\2/g')"
 				echo -n "$patch_name... "
 				cd patches
 				curl -sO $patch_url >> ${LDIR}/$package.log 2>&1
 				cd ..
-				patch $patch_param < patches/$patch_name
+				patch $patch_param < patches/$patch_name >> ${LDIR}/$package.log 2>&1
 			done
-#			cd ..
-#			for patch in $(ls patches/*)
-#			do
-#				echo -n "$patch... "
-#				patch < $patch >> ${LDIR}/$package.log 2>&1
-#			done
 		fi
-		if [[ "${BUILDFLAGs[$package]}" =~ "autoreconf" ]]
-		then
-			echo -n "reconfiguring... "
-			cd ${SD}/${SRCDIRs[$package]}
-			autoreconf -fi >> ${LDIR}/$package.log 2>&1
-		fi
+		cd ${SD}/${SRCDIRs[$package]}
+		case ${BUILDFLAGs[$package]} in
+			*"autoreconf"*)
+				echo -n "reconfiguring... "
+				autoreconf -fi >> ${LDIR}/$package.log 2>&1
+				;;
+			*"libtoolize"*)
+				echo -n "libtoolizing... "
+				libtoolize --automake --copy --force >> ${LDIR}/$package.log 2>&1
+				;&
+			*"autogen"*)
+				echo -n "autogen.sh... "
+				WANT_AUTOMAKE=latest ./autogen.sh --skip-gnulib >> ${LDIR}/$package.log 2>&1
+				;;
+		esac
 	fi
 	cd ${BD}
 	[ ! -d $package ] && mkdir $package
@@ -92,7 +95,7 @@ do
 	then
 		rm -rf *
 		echo -n "building... "
-		CFLAGS=${CFLAGSs[$package]} ${SD}/${SRCDIRs[$package]}${CONFs[$package]} >> ${LDIR}/$package.log 2>&1 &&
+		CFLAGS=${CFLAGSs[$package]} ${SD}/${SRCDIRs[$package]}/${CONFs[$package]} >> ${LDIR}/$package.log 2>&1 &&
 		make -j$THREADS V=1 >> ${LDIR}/$package.log 2>&1 &&
 		make DESTDIR=${TD} install >> ${LDIR}/$package.log 2>&1 &&
 		touch l4w.installed &&
