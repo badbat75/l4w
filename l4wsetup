@@ -2,6 +2,8 @@
 
 #set -x
 
+SEP="'"
+
 ### Performance
 THREADS=$(echo $(nproc)/2+1 | bc) 
 
@@ -31,6 +33,7 @@ declare -A PKGNAMEs
 declare -A URLs
 declare -A PATCHes
 declare -A CFLAGSs
+declare -A CXXFLAGSs
 declare -A CONFs
 declare -A SRCDIRs
 declare -A BUILDFLAGs
@@ -95,7 +98,13 @@ do
 	then
 		rm -rf *
 		echo -n "building... "
-		CFLAGS=${CFLAGSs[$package]} ${SD}/${SRCDIRs[$package]}/${CONFs[$package]} >> ${LDIR}/$package.log 2>&1 &&
+		case ${BUILDFLAGs[$package]} in
+			*"host_configargs"*)	host_configargs='CFLAGS="-I/mnt/c/l4w/include" CXXFLAGS="-I/mnt/c/l4w/include"' ${SD}/${SRCDIRs[$package]}/${CONFs[$package]} >> ${LDIR}/$package.log 2>&1
+									;;
+			*)
+									CFLAGS="${CFLAGSs[$package]}" CXXFLAGS="${CXXFLAGSs[$package]}" ${SD}/${SRCDIRs[$package]}/${CONFs[$package]} >> ${LDIR}/$package.log 2>&1
+									;;
+		esac
 		make -j$THREADS V=1 >> ${LDIR}/$package.log 2>&1 &&
 		make DESTDIR=${TD} install >> ${LDIR}/$package.log 2>&1 &&
 		touch l4w.installed &&

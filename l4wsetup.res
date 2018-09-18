@@ -1,5 +1,5 @@
 ### Package settings
-PKGLIST="zlib winpthreads ncurses readline gmp gmp-shared mpfr isl mpc iconv xml2 gettext-runtime binutils"
+PKGLIST="zlib winpthreads ncurses readline gmp gmp-shared mpfr isl mpc iconv xml2 gettext-runtime binutils mingw-w64-headers gcc8"
 
 # zlib
 PKGNAMEs[zlib]="zlib-1.2.11.tar.xz"
@@ -94,8 +94,16 @@ URLs[binutils]="https://mirror2.mirror.garr.it/mirrors/gnuftp/binutils/${PKGNAME
 CFLAGSs[binutils]="${CFLAGS} -I${TD}/include -Wl,-L${TD}/lib"
 CONFs[binutils]="configure --build=x86_64-linux-gnu --host=$HOST --prefix= --with-build-sysroot=${TD} --disable-werror --enable-ld=yes --enable-gold=no --enable-plugins --disable-multilib --disable-sim --disable-gdb --with-system-zlib --with-mpc=${TD} --with-mpfr=${TD} --with-gmp=${TD} --with-isl=${TD} --with-intl-prefix=${TD}"
 
+# mingw-w64-headers
+PKGNAMEs[mingw-w64-headers]="mingw-w64-v5.0.4.tar.bz2"
+URLs[mingw-w64-headers]="https://sourceforge.net/projects/mingw-w64/files/mingw-w64/mingw-w64-release/${PKGNAMEs[mingw-w64-headers]}/download/"
+CFLAGSs[mingw-w64-headers]="${CFLAGS}"
+CONFs[mingw-w64-headers]="mingw-w64-headers/configure --build=x86_64-linux-gnu --host=$HOST --prefix= --with-sysroot=${TD} --enable-idl --enable-secure-api"
+
 # gcc8
 PKGNAMEs[gcc8]="gcc-8.2.0.tar.xz"
 URLs[gcc8]="https://mirror2.mirror.garr.it/mirrors/gnuftp/gcc/gcc-8.2.0/${PKGNAMEs[gcc8]}"
 CFLAGSs[gcc8]="${CFLAGS} -I${TD}/include -Wl,-L${TD}/lib"
-CONFs[gcc8]="configure --build=x86_64-linux-gnu --host=$HOST --prefix= --with-build-sysroot=${TD} --enable-languages=c,c++ --with-arch=core-avx2 --enable-__cxa_atexit --enable-libmudflap --enable-libgomp --enable-libssp --enable-libquadmath --enable-libquadmath-support --disable-libsanitizer --disable-libmpx --with-gmp=${TD} --with-mpfr=${TD} --with-mpc=${TD} --with-isl=${TD} --enable-lto --enable-threads=posix --enable-target-optspace --enable-plugin --with-libintl-prefix${TD} --disable-multilib --with-local-prefix=${TD} --enable-long-long"
+CXXFLAGSs[gcc8]="${CXXFLAGS} -I${TD}/include -Wl,-L${TD}/lib"
+BUILDFLAGs[gcc8]="host_configargs"
+CONFs[gcc8]="configure --build=x86_64-linux-gnu --host=$HOST --prefix= --with-build-sysroot=${TD} --enable-languages=c,c++ --with-arch=core-avx2 --enable-__cxa_atexit --enable-libmudflap --enable-libgomp --enable-libssp --enable-libquadmath --enable-libquadmath-support --disable-libsanitizer --disable-libmpx --with-gmp=${TD} --with-mpfr=${TD} --with-mpc=${TD} --with-isl=${TD} --enable-lto --enable-threads=posix --enable-target-optspace --enable-plugin --with-libintl-prefix=${TD} --disable-multilib --enable-long-long --with-system-zlib --disable-bootstrap"
