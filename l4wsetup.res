@@ -6,7 +6,7 @@ PKGNAMEs[zlib]="zlib-1.2.11.tar.xz"
 URLs[zlib]="https://zlib.net/${PKGNAMEs[zlib]}"
 PATCHes[zlib]="https://raw.githubusercontent.com/Alexpux/MSYS2-packages/master/mingw-w64-cross-zlib/01-zlib-1.2.11-1-buildsys.mingw.patch[]"
 CFLAGSs[zlib]="${CFLAGS}"
-CONFs[zlib]="configure --prefix="
+CONFs[zlib]="configure CC=$CC --prefix="
 
 # winpthreads
 PKGNAMEs[winpthreads]="mingw-w64-v5.0.4.tar.bz2"
@@ -46,7 +46,7 @@ CFLAGSs[mpfr]="${CFLAGS}"
 CONFs[mpfr]="configure --build=x86_64-linux-gnu --host=$HOST --prefix= --with-sysroot=${TD} --with-gmp=${TD} --enable-shared"
 
 # isl
-PKGNAMEs[isl]="isl-0.20.tar.xz"
+PKGNAMEs[isl]="isl-0.18.tar.xz"
 URLs[isl]="http://isl.gforge.inria.fr/${PKGNAMEs[isl]}"
 PATCHes[isl]="https://raw.githubusercontent.com/Alexpux/MINGW-packages/master/mingw-w64-isl/isl-0.14.1-no-undefined.patch[]"
 CFLAGSs[isl]="${CFLAGS}"
@@ -103,7 +103,9 @@ CONFs[mingw-w64-headers]="mingw-w64-headers/configure --build=x86_64-linux-gnu -
 # gcc8
 PKGNAMEs[gcc8]="gcc-8.2.0.tar.xz"
 URLs[gcc8]="https://mirror2.mirror.garr.it/mirrors/gnuftp/gcc/gcc-8.2.0/${PKGNAMEs[gcc8]}"
-CFLAGSs[gcc8]="${CFLAGS} -I${TD}/include -Wl,-L${TD}/lib"
-CXXFLAGSs[gcc8]="${CXXFLAGS} -I${TD}/include -Wl,-L${TD}/lib"
-BUILDFLAGs[gcc8]="host_configargs"
-CONFs[gcc8]="configure --build=x86_64-linux-gnu --host=$HOST --prefix= --with-build-sysroot=${TD} --enable-languages=c,c++ --with-arch=core-avx2 --enable-__cxa_atexit --enable-libmudflap --enable-libgomp --enable-libssp --enable-libquadmath --enable-libquadmath-support --disable-libsanitizer --disable-libmpx --with-gmp=${TD} --with-mpfr=${TD} --with-mpc=${TD} --with-isl=${TD} --enable-lto --enable-threads=posix --enable-target-optspace --enable-plugin --with-libintl-prefix=${TD} --disable-multilib --enable-long-long --with-system-zlib --disable-bootstrap"
+PATCHes[gcc8]="https://gcc.gnu.org/viewcvs/gcc/branches/gcc-8-branch/gcc/graphite.h?view=patch&r1=263194&r2=263193&pathrev=263194[-p2]"
+CFLAGSs[gcc8]="${CFLAGS}"
+CXXFLAGSs[gcc8]="${CXXFLAGS}"
+LDFLAGSs[gcc8]="${LDFLAGS}"
+CONFs[gcc8]="configure --build=x86_64-linux-gnu --host=$HOST --target=$HOST --prefix= --with-sysroot=${TD} --with-native-system-header-dir=/include --with-native-system-header-dir=/include --program-suffix=-8 --with-tune=generic --with-arch_32=x86-64 --enable-languages=c,c++ --enable-checking=release --with-system-zlib --with-gmp=${TD} --with-mpfr=${TD} --with-mpc=${TD} --with-isl=${TD} --with-libiconv-prefix=${TD} --enable-shared --enable-__cxa_atexit --enable-libmudflap --enable-libgomp --enable-libssp --enable-libquadmath --enable-libquadmath-support --enable-lto --enable-threads=posix --enable-plugin --enable-long-long --enable-gnu-unique-object --enable-linker-build-id --enable-gnu-indirect-function --disable-libunwind-exceptions --disable-bootstrap"
+#--disable-multilib

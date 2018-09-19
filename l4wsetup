@@ -21,11 +21,11 @@ HOST=x86_64-w64-mingw32
 XCP=/opt/x-tools/$HOST
 XCBP=$XCP/bin
 export PATH=${PATH}:${XCBP}
-export CC=$HOST-gcc
-export CXX=$HOST-g++
-export CPP=$HOST-cpp
-export RANLIB=$CC-ranlib
-export LD=$HOST-ld
+CC=$HOST-gcc
+CXX=$HOST-g++
+CPP=$HOST-cpp
+RANLIB=$CC-ranlib
+LD=$HOST-ld
 #export LDFLAGS="-L$XCP/$HOST/sysroot/mingw/lib -L$XCP/$HOST/sysroot/lib -L$XCP/$HOST/sysroot/usr/lib"
 export uname="mingw"
 
@@ -34,6 +34,7 @@ declare -A URLs
 declare -A PATCHes
 declare -A CFLAGSs
 declare -A CXXFLAGSs
+declare -A LDFLAGSs
 declare -A CONFs
 declare -A SRCDIRs
 declare -A BUILDFLAGs
@@ -70,7 +71,7 @@ do
 				patch_param="$(echo $patch | sed -E 's/(.*)\[(.*)\]/\2/g')"
 				echo -n "$patch_name... "
 				cd patches
-				curl -sO $patch_url >> ${LDIR}/$package.log 2>&1
+				curl -sO -A "wget" "$patch_url" >> ${LDIR}/$package.log 2>&1
 				cd ..
 				patch $patch_param < patches/$patch_name >> ${LDIR}/$package.log 2>&1
 			done
@@ -98,13 +99,7 @@ do
 	then
 		rm -rf *
 		echo -n "building... "
-		case ${BUILDFLAGs[$package]} in
-			*"host_configargs"*)	host_configargs='CFLAGS="-I/mnt/c/l4w/include" CXXFLAGS="-I/mnt/c/l4w/include"' ${SD}/${SRCDIRs[$package]}/${CONFs[$package]} >> ${LDIR}/$package.log 2>&1
-									;;
-			*)
-									CFLAGS="${CFLAGSs[$package]}" CXXFLAGS="${CXXFLAGSs[$package]}" ${SD}/${SRCDIRs[$package]}/${CONFs[$package]} >> ${LDIR}/$package.log 2>&1
-									;;
-		esac
+		CFLAGS="${CFLAGSs[$package]}" CXXFLAGS="${CXXFLAGSs[$package]}" ${SD}/${SRCDIRs[$package]}/${CONFs[$package]} >> ${LDIR}/$package.log 2>&1 &&
 		make -j$THREADS V=1 >> ${LDIR}/$package.log 2>&1 &&
 		make DESTDIR=${TD} install >> ${LDIR}/$package.log 2>&1 &&
 		touch l4w.installed &&
