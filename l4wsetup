@@ -32,27 +32,18 @@ export uname="mingw"
 declare -A PKGNAMEs
 declare -A URLs
 declare -A PATCHes
-declare -A CFLAGSs
-declare -A CXXFLAGSs
-declare -A LDFLAGSs
+declare -A VARs
 declare -A CONFs
 declare -A SRCDIRs
 declare -A BUILDFLAGs
+declare -A MAKEINSTs
 
 THREADS=$(echo $(nproc)/2+1 | bc)
 
 [ -f $WD/l4wsetup.res ] && . $WD/l4wsetup.res || exit 1
 
-### Main
 
-[ ! -d ${PD} ] && mkdir ${PD}
-[ ! -d ${SD} ] && mkdir ${SD}
-[ ! -d ${BD} ] && mkdir ${BD}
-[ ! -d ${TD} ] && mkdir ${TD}
-[ ! -d ${LDIR} ] && mkdir ${LDIR}
-
-for package in ${PKGLIST}
-do
+function prepare() {
 	echo -n "$package: downloading... "
 	cd ${PD}
 	[ ! -f ${PKGNAMEs[$package]} ] && curl -sLo ${PKGNAMEs[$package]} ${URLs[$package]}
@@ -94,21 +85,46 @@ do
 				;;
 		esac
 	fi
+}
+
+function build() {
 	cd ${BD}
 	[ ! -d $package ] && mkdir $package
 	cd $package
 	if [ ! -f l4w.installed ]
 	then
 		rm -rf *
-		echo -n "building... "
-		CFLAGS="${CFLAGSs[$package]}" CXXFLAGS="${CXXFLAGSs[$package]}" ${SD}/${SRCDIRs[$package]}/${CONFs[$package]} >> ${LDIR}/$package.log 2>&1 &&
+		echo "building... "
+		echo "${VARs[$package]} ${SD}/${SRCDIRs[$package]}/${CONFs[$package]}"
+		sh -c "${VARs[$package]} ${SD}/${SRCDIRs[$package]}/${CONFs[$package]}" >> ${LDIR}/$package.log 2>&1 &&
 		make -j$THREADS V=1 >> ${LDIR}/$package.log 2>&1 &&
-		make DESTDIR=${TD} -j${THREADS} install >> ${LDIR}/$package.log 2>&1 &&
-		touch l4w.installed &&
-		echo "installed." || echo "failed."
+		make DESTDIR=${TD} -j${THREADS} ${MAKEINSTs[package]:-install} >> ${LDIR}/$package.log 2>&1 &&
+		touch l4w.installed && BUILD_STATUS=0 || BUILD_STATUS=1
+		if [ BUILD_STATUS -eq 0]
+		then
+			echo "installed."
+		else
+			echo "failed."
+			exit 1
+		fi
+		echo ""
 	else
 		echo "already installed."
 	fi
 #	read
-	cd ${WD}
+}
+
+### Main
+
+[ ! -d ${PD} ] && mkdir ${PD}
+[ ! -d ${SD} ] && mkdir ${SD}
+[ ! -d ${BD} ] && mkdir ${BD}
+[ ! -d ${TD} ] && mkdir ${TD}
+[ ! -d ${LDIR} ] && mkdir ${LDIR}
+
+for package in ${PKGLIST}
+do
+	prepare
+	build
 done
+cd ${WD}
