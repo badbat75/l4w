@@ -92,7 +92,7 @@ BUILDFLAGs[gettext]="libtoolize autogen"
 # binutils
 PKGNAMEs[binutils]="binutils-2.31.1.tar.xz"
 URLs[binutils]="https://mirror2.mirror.garr.it/mirrors/gnuftp/binutils/${PKGNAMEs[binutils]}"
-VARs[binutils]="CFLAGS=\"${CFLAGS} -I${TD}/include\" LDFLAGS=\"${LDFLAGS} -L${TD}/lib\""
+#VARs[binutils]="CFLAGS=\"${CFLAGS} -I${TD}/include\" LDFLAGS=\"${LDFLAGS} -L${TD}/lib\""
 CONFs[binutils]="configure --build=x86_64-linux-gnu --host=${HOST} --target=${HOST} --prefix= --with-sysroot=${TD} --with-system-zlib --with-mpc=${TD} --with-mpfr=${TD} --with-gmp=${TD} --with-isl=${TD} --with-intl-prefix=${TD} --enable-plugins --disable-rpath"
 #--disable-werror --enable-ld=yes --enable-gold=no  --disable-multilib --disable-sim --disable-gdb
 

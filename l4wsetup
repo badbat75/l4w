@@ -100,7 +100,7 @@ function build() {
 		make -j$THREADS V=1 >> ${LDIR}/$package.log 2>&1 &&
 		make DESTDIR=${TD} -j${THREADS} ${MAKEINSTs[package]:-install} >> ${LDIR}/$package.log 2>&1 &&
 		touch l4w.installed && BUILD_STATUS=0 || BUILD_STATUS=1
-		if [ BUILD_STATUS -eq 0]
+		if [ "$BUILD_STATUS" -eq "0" ]
 		then
 			echo "installed."
 		else
