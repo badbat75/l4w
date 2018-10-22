@@ -39,6 +39,8 @@ declare -A CONFs
 declare -A SRCDIRs
 declare -A BUILDFLAGs
 
+THREADS=$(echo $(nproc)/2+1 | bc)
+
 [ -f $WD/l4wsetup.res ] && . $WD/l4wsetup.res || exit 1
 
 ### Main
@@ -101,7 +103,7 @@ do
 		echo -n "building... "
 		CFLAGS="${CFLAGSs[$package]}" CXXFLAGS="${CXXFLAGSs[$package]}" ${SD}/${SRCDIRs[$package]}/${CONFs[$package]} >> ${LDIR}/$package.log 2>&1 &&
 		make -j$THREADS V=1 >> ${LDIR}/$package.log 2>&1 &&
-		make DESTDIR=${TD} install >> ${LDIR}/$package.log 2>&1 &&
+		make DESTDIR=${TD} -j${THREADS} install >> ${LDIR}/$package.log 2>&1 &&
 		touch l4w.installed &&
 		echo "installed." || echo "failed."
 	else
